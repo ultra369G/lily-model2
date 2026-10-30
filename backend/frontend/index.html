@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌸</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap');
+    :root {
+      --primary: #7E57C2;
+      --secondary: #26A69A;
+      --error: #EF5350;
+      --admin: #FFA000;
+      --table-bg: #E3F2FD;
+      --table-border: #BBDEFB;
+    }
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #333;
+    }
+    #app {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    h1 {
+      color: var(--primary);
+      margin: 0;
+      font-size: 28px;
+    }
+    #status {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+    #chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    #chat-history {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 18px;
+      max-width: 80%;
+      word-break: break-word;
+      line-height: 1.4;
+    }
+    .user-msg {
+      background: var(--primary);
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 5px;
+    }
+    .ai-msg {
+      background: #EEEEEE;
+      margin-right: auto;
+      border-bottom-left-radius: 5px;
+    }
+    .system-msg {
+      background: #B2DFDB;
+      margin: 10px auto;
+      text-align: center;
+      font-size: 0.9em;
+      max-width: 90%;
+      padding: 8px 12px;
+    }
+    .admin-msg {
+      background: var(--admin);
+      color: white;
+      text-align: center;
+      margin: 10px auto;
+      font-size: 0.9em;
+    }
+    #input-area {
+      display: flex;
+      padding: 15px;
+      background: #f5f5f5;
+      border-top: 1px solid #ddd;
+    }
+    #user-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 24px;
+      outline: none;
+      font-size: 16px;
+    }
+    #send-btn {
+      margin-left: 10px;
+      padding: 12px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    #send-btn:hover {
+      background: #6a4ba8;
+    }
+    .training-panel {
+      background: var(--table-bg);
+      padding: 15px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--table-border);
+    }
+    .training-panel p {
+      margin: 5px 0;
+    }
+    .training-panel input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid var(--table-border);
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .training-panel button {
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .training-panel button:hover {
+      background: #1e8c7f;
+    }
+    #admin-controls {
+      display: none;
+      background: #FFF8E1;
+      padding: 10px;
+      border-bottom: 1px solid #FFE082;
+    }
+    #admin-controls button {
+      background: var(--admin);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      margin-right: 5px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    #admin-controls button:hover {
+      background: #e68a00;
+    }
+    #autotrain-file {
+      margin: 5px 10px 5px 0;
+    }
+    .typing-indicator {
+      display: inline-block;
+      margin-left: 5px;
+    }
+    .typing-indicator span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #999;
+      border-radius: 50%;
+      margin-right: 3px;
+      animation: typing 1s infinite ease-in-out;
+    }
+    .typing-indicator span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing-indicator span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes typing {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    .table-container {
+      margin: 10px 0;
+      background: var(--table-bg);
+      border: 1px solid var(--table-border);
+      border-radius: 8px;
+      padding: 15px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--table-border);
+    }
+    th {
+      background: var(--secondary);
+      color: white;
+    }
+    tr:hover {
+      background: #d6e9fb;
+    }
+    .status-sent { color: #4CAF50; }
+    .status-queued { color: #FFA000; }
+    .status-failed { color: var(--error); }
+    @media (max-width: 480px) {
+      #app { padding: 10px; height: 100vh; width: 100%; }
+      #chat-history { padding: 10px; }
+      .message { max-width: 90%; padding: 8px 12px; }
+      table { font-size: 12px; }
+      th, td { padding: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Lily-🌸</h1>
+      <div id="status">🟡 Connecting...</div>
+    </header>
+    <div id="chat-container">
+      <div id="admin-controls">
+        <button id="start-teaching">Start Teaching</button>
+        <button id="stop-teaching">Stop Teaching</button>
+        <button id="clear-chat">Clear Chat</button>
+        <input type="file" id="autotrain-file" accept=".txt,.json,.pdf">
+        <button id="autotrain-btn">Auto Train</button>
+      </div>
+      <div id="chat-history">
+        <div class="system-msg">System initialized. Type "help" for commands.</div>
+      </div>
+      <div id="input-area">
+        <input type="text" id="user-input" placeholder="Type your message..." autocomplete="off">
+        <button id="send-btn">Send</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const statusIndicator = document.getElementById('status');
+    const adminControls = document.getElementById('admin-controls');
+    const startTeachingBtn = document.getElementById('start-teaching');
+    const stopTeachingBtn = document.getElementById('stop-teaching');
+    const clearChatBtn = document.getElementById('clear-chat');
+    const autotrainFile = document.getElementById('autotrain-file');
+    const autotrainBtn = document.getElementById('autotrain-btn');
+    
+    let isAdmin = false;
+    let isTeaching = false;
+    let adminToken = '';
+    let socket;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+
+    function connectWebSocket() {
+      socket = new WebSocket('ws://localhost:5000/chat');
+      socket.onopen = () => {
+        statusIndicator.textContent = "🟢 Connected";
+        statusIndicator.style.color = "#4CAF50";
+        console.log("WebSocket connected");
+        reconnectAttempts = 0;
+      };
+      socket.onerror = (error) => {
+        statusIndicator.textContent = "🔴 Connection Error";
+        statusIndicator.style.color = "#F44336";
+        console.error("WebSocket error:", error);
+        addMessage("Connection error. Retrying...", 'system');
+      };
+      socket.onclose = (event) => {
+        statusIndicator.textContent = "🟡 Reconnecting...";
+        statusIndicator.style.color = "#FF9800";
+        console.log(`WebSocket closed: code ${event.code}, reason: ${event.reason}`);
+        addMessage(`Connection lost (code ${event.code}). Reconnecting...`, 'system');
+        if (reconnectAttempts < maxReconnectAttempts) {
+          reconnectAttempts++;
+          setTimeout(connectWebSocket, 2000 * reconnectAttempts);
+        } else {
+          addMessage("Max reconnection attempts reached. Please refresh the page.", 'system');
+        }
+      };
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.response) {
+            addMessage(data.response, data.is_admin ? 'admin' : 'ai');
+            if (data.emails && data.type === 'email_list') {
+              displayEmails(data.emails);
+            }
+            if (data.contacts && data.type === 'contact_list') {
+              displayContacts(data.contacts);
+            }
+            if (data.type === 'notification') {
+              addMessage(data.response, 'system');
+            }
+            isAdmin = data.is_admin || isAdmin;
+            adminToken = data.admin_token || adminToken;
+            isTeaching = data.learning_mode !== undefined ? data.learning_mode : isTeaching;
+            if (isAdmin) {
+              adminControls.style.display = 'block';
+              console.log("Admin token updated:", adminToken);
+            }
+          } else if (data.error) {
+            addMessage(data.error, 'system');
+          }
+        } catch (e) {
+          console.error("Invalid WebSocket message:", e);
+          addMessage("Received invalid message from server", 'system');
+        }
+        hideTypingIndicator();
+      };
+    }
+
+    function addMessage(text, type) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message ${type}-msg`;
+      messageDiv.textContent = text;
+      chatHistory.appendChild(messageDiv);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function displayEmails(emails) {
+      const tableContainer = document.createElement('div');
+      tableContainer.className = 'table-container';
+      let tableHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Recipient</th>
+              <th>Email</th>
+              <th>Subject</th>
+              <th>Status</th>
+              <th>Timestamp</th>
+              <th>Intent</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      emails.forEach(email => {
+        tableHTML += `
+          <tr>
+            <td>${email.id}</td>
+            <td>${email.recipient_name}</td>
+            <td>${email.recipient_email}</td>
+            <td>${email.subject}</td>
+            <td class="status-${email.status.toLowerCase()}">${email.status}</td>
+            <td>${new Date(email.timestamp).toLocaleString()}</td>
+            <td>${email.intent || 'N/A'}</td>
+          </tr>
+        `;
+      });
+      tableHTML += '</tbody></table>';
+      tableContainer.innerHTML = tableHTML;
+      chatHistory.appendChild(tableContainer);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function displayContacts(contacts) {
+      const tableContainer = document.createElement('div');
+      tableContainer.className = 'table-container';
+      let tableHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Details</th>
+              <th>Added</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+      contacts.forEach(contact => {
+        tableHTML += `
+          <tr>
+            <td>${contact.name}</td>
+            <td>${contact.email}</td>
+            <td>${contact.phone_number}</td>
+            <td>${contact.details}</td>
+            <td>${new Date(contact.timestamp).toLocaleString()}</td>
+          </tr>
+        `;
+      });
+      tableHTML += '</tbody></table>';
+      tableContainer.innerHTML = tableHTML;
+      chatHistory.appendChild(tableContainer);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message ai-msg';
+      typingDiv.innerHTML = `<div class="typing-indicator"><span></span><span></span><span></span></div>`;
+      typingDiv.id = 'typing-indicator';
+      chatHistory.appendChild(typingDiv);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+      const typingIndicator = document.getElementById('typing-indicator');
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+
+    function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message || !socket || socket.readyState !== WebSocket.OPEN) {
+        addMessage("Cannot send message. Please check connection.", 'system');
+        return;
+      }
+      addMessage(message, 'user');
+      showTypingIndicator();
+      socket.send(JSON.stringify({
+        message,
+        admin_token: adminToken,
+        learning_mode: isTeaching
+      }));
+      userInput.value = '';
+    }
+
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    sendBtn.addEventListener('click', sendMessage);
+
+    startTeachingBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        addMessage("Starting teaching mode...", 'system');
+        socket.send(JSON.stringify({
+          message: 'learn:start',
+          admin_token: adminToken,
+          learning_mode: isTeaching
+        }));
+      }
+    });
+
+    stopTeachingBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        addMessage("Stopping teaching mode...", 'system');
+        socket.send(JSON.stringify({
+          message: 'learn:stop',
+          admin_token: adminToken,
+          learning_mode: isTeaching
+        }));
+      }
+    });
+
+    clearChatBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        addMessage("Clearing chat...", 'system');
+        socket.send(JSON.stringify({
+          message: 'clear',
+          admin_token: adminToken
+        }));
+        chatHistory.innerHTML = '<div class="system-msg">Chat cleared. Type "help" for commands.</div>';
+      }
+    });
+
+    autotrainBtn.addEventListener('click', () => {
+      if (!autotrainFile.files.length) {
+        addMessage("Please select a file to auto-train.", 'system');
+        return;
+      }
+      const file = autotrainFile.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      fetch('/admin/autotrain', {
+        method: 'POST',
+        headers: {
+          'X-Admin-Token': adminToken
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.response) {
+          addMessage(data.response, 'admin');
+        } else if (data.error) {
+          addMessage(data.error, 'system');
+        }
+        autotrainFile.value = '';
+      })
+      .catch(error => {
+        console.error("Auto-train error:", error);
+        addMessage("Failed to auto-train.", 'system');
+      });
+    });
+
+    // Initialize WebSocket connection
+    connectWebSocket();
+  </script>
+</body>
+</html>
